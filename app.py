@@ -1,18 +1,16 @@
 import os, sys, shutil, time
 
-from flask import Flask, request, jsonify, render_template,send_from_directory
+from flask import Flask, request, jsonify, render_template, send_from_directory
 import pandas as pd
-from sklearn.externals import joblib
+import joblib
 from sklearn.ensemble import RandomForestClassifier
 import numpy as np
 import urllib.request
 import json
 from geopy.geocoders import Nominatim
 
-
-
 app = Flask(__name__)
-
+app.config['images'] ="static/images"
 
 
 @app.route('/')
@@ -41,13 +39,13 @@ def contact():
 
 @app.route('/result.html', methods = ['POST'])
 def predict():
-    rfc = joblib.load('model/rf_model')
+    rfc = joblib.load('model/rf_model2')
     print('model loaded')
 
     if request.method == 'POST':
 
         address = request.form['Location']
-        geolocator = Nominatim()
+        geolocator = Nominatim(user_agent="MyApp")
         location = geolocator.geocode(address,timeout=None)
         print(location.address)
         lat=[location.latitude]
@@ -64,14 +62,14 @@ def predict():
 
         data['timestamp'] = pd.to_datetime(data['timestamp'].astype(str), errors='coerce')
         data['timestamp'] = pd.to_datetime(data['timestamp'], format = '%d/%m/%Y %H:%M:%S')
-        column_1 = data.ix[:,0]
+        column_1 = data.iloc[:,0]
         DT=pd.DataFrame({"year": column_1.dt.year,
               "month": column_1.dt.month,
               "day": column_1.dt.day,
               "hour": column_1.dt.hour,
               "dayofyear": column_1.dt.dayofyear,
-              "week": column_1.dt.week,
-              "weekofyear": column_1.dt.weekofyear,
+              "week": column_1.dt.isocalendar().week,
+              "weekofyear": column_1.isocalendar().week,
               "dayofweek": column_1.dt.dayofweek,
               "weekday": column_1.dt.weekday,
               "quarter": column_1.dt.quarter,
