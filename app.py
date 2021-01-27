@@ -97,6 +97,63 @@ def predict():
 
     return render_template('result.html', prediction = my_prediction)
 
+@app.route('/result.json', methods = ['GET'])
+def predict_json():
+    rfc = joblib.load('model/rf_model2')
+    print('model loaded')
+
+    lat = [request.args.get('lat')]
+    lon = [request.args.get('lon')]
+    latlong = pd.DataFrame({'latitude':lat,'longitude':lon})
+    print(latlong)
+
+    DT = request.args.get('timestamp')
+    latlong['timestamp'] = DT
+    data=latlong
+    cols = data.columns.tolist()
+    cols = cols[-1:] + cols[:-1]
+    data = data[cols]
+
+    data['timestamp'] = pd.to_datetime(data['timestamp'].astype(str), errors='coerce')
+    data['timestamp'] = pd.to_datetime(data['timestamp'], format = '%d/%m/%Y %H:%M:%S')
+
+    column_1 = data.iloc[:,0]
+
+    DT=pd.DataFrame({"year": column_1.dt.year,
+            "month": column_1.dt.month,
+            "day": column_1.dt.day,
+            "hour": column_1.dt.hour,
+            "dayofyear": column_1.dt.dayofyear,
+            "week": column_1.dt.isocalendar().week,
+            "weekofyear": column_1.dt.isocalendar().week,
+            "dayofweek": column_1.dt.dayofweek,
+            "weekday": column_1.dt.weekday,
+            "quarter": column_1.dt.quarter,
+            })
+    data=data.drop('timestamp',axis=1)
+    final=pd.concat([DT,data],axis=1)
+    X=final.iloc[:,[1,2,3,4,6,10,11]].values
+    my_prediction = rfc.predict(X)
+    prediction = []
+    if my_prediction[0][0] == 1:
+        prediction.append('robbery')
+
+    if my_prediction[0][1] == 1:
+        prediction.append('gambling')
+
+    if my_prediction[0][2] == 1:
+        prediction.append('accident')
+
+    if my_prediction[0][3] == 1:
+        prediction.append('violence')
+
+    if my_prediction[0][4] == 1:
+        prediction.append('murder')
+
+    if my_prediction[0][5] == 1:
+        prediction.append('kidnapping')
+
+    return jsonify(prediction)
 
 if __name__ == '__main__':
     app.run(debug = True)
