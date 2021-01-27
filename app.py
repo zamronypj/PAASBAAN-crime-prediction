@@ -69,7 +69,7 @@ def predict():
               "hour": column_1.dt.hour,
               "dayofyear": column_1.dt.dayofyear,
               "week": column_1.dt.isocalendar().week,
-              "weekofyear": column_1.isocalendar().week,
+              "weekofyear": column_1.dt.isocalendar().week,
               "dayofweek": column_1.dt.dayofweek,
               "weekday": column_1.dt.weekday,
               "quarter": column_1.dt.quarter,
