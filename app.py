@@ -121,20 +121,13 @@ def predict_json():
 
     column_1 = data.iloc[:,0]
 
-    if hasattr(column_1.dt, 'isocalendar'):
-        week = column_1.dt.isocalendar().week
-        weekofyear = column_1.dt.isocalendar().week
-    else:
-        week = column_1.dt.week
-        weekofyear = column_1.dt.weekofyear
-
     DT=pd.DataFrame({"year": column_1.dt.year,
             "month": column_1.dt.month,
             "day": column_1.dt.day,
             "hour": column_1.dt.hour,
             "dayofyear": column_1.dt.dayofyear,
-            "week": week,
-            "weekofyear": weekofyear,
+            "week": column_1.dt.isocalendar().week,
+            "weekofyear": column_1.dt.isocalendar().week,
             "dayofweek": column_1.dt.dayofweek,
             "weekday": column_1.dt.weekday,
             "quarter": column_1.dt.quarter,
